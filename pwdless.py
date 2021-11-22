@@ -7,7 +7,10 @@ def generateCode(email):
 	cfg.tokenMetaData['jti'] = oneTimeNonce()
 	cfg.tokenMetaData['issuedFor'] = email
 	jwtToken = jwt.encode(cfg.tokenMetaData, cfg.jwtSecret , algorithm='HS256')
-	return cfg.baseURL + base64.b64encode(jwtToken)
+	message_bytes = jwtToken.encode('ascii')
+	base64_bytes = base64.b64encode(message_bytes)
+	base64_message = base64_bytes.decode('ascii')
+	return(cfg.baseURL + base64_message)
 
 def sendEmail(code):
 	try:
@@ -23,25 +26,25 @@ def sendEmail(code):
 			server.close()
 			return True
 	except Exception as e:
-		print "Failed to send email. Error ==> " + str(e)
+		print("Failed to send email. Error ==> " + str(e))
 		return False
 
-def validateCode(returnToken,returnEmail=""):
+def validateCode(returnToken,returnEmail=""):	
 	try:
 		tokenMetaData = jwt.decode(trimToken(returnToken), cfg.jwtSecret , algorithms=['HS256'])
 		# Validate JWT
 		if tokenMetaData["exp"] < int(time.time()):
-			print "Failed to validate returning token. Error ==> Token Expired"
+			print("Failed to validate returning token. Error ==> Token Expired")
 			return False
 		elif returnEmail != "":
 			if tokenMetaData["issuedFor"] != returnEmail:
-				print "Failed to validate returning token. Error ==> Code not associated with email address specified"
+				print("Failed to validate returning token. Error ==> Code not associated with email address specified")
 				return False
 			return True
 		else:
 			return True
 	except Exception as e:
-		print "Failed to validate returning token. Error ==> " + str(e)
+		print("Failed to validate returning token. Error ==> " + str(e))
 		return False
 
 def oneTimeNonce(size=16, chars=string.ascii_uppercase + string.digits):
@@ -49,4 +52,10 @@ def oneTimeNonce(size=16, chars=string.ascii_uppercase + string.digits):
 
 def trimToken(code):
 	returnTokenWithoutURL = code.replace(cfg.baseURL,"")
-	return base64.b64decode(returnTokenWithoutURL)
+	base64_bytes = returnTokenWithoutURL.encode('ascii')
+	message_bytes = base64.b64decode(base64_bytes)
+	message = message_bytes.decode('ascii')
+	return(message)
+
+code = generateCode("rajuraj0706@gmail.com")
+sendmail = sendEmail(code)
