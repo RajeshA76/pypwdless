@@ -57,5 +57,3 @@ def trimToken(code):
 	message = message_bytes.decode('ascii')
 	return(message)
 
-code = generateCode("rajuraj0706@gmail.com")
-sendmail = sendEmail(code)
